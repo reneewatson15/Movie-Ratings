@@ -1,0 +1,16 @@
+---
+title: "Movie Ratings"
+author: "Renee Watson"
+date: "2026-09-10"
+output: html_document
+---
+
+# Movie Ratings
+
+## Approach
+
+In this assignment, I plan to collect movie ratings from at least five people for six popular moives. Each participant will rate the movies they have seen on a scale form 1 to 5. PostgreSQL will be used to store and organize the collected data. Separate tables will be made for the participants, movies, and ratings. The ratings table will connect each participant to the movies they rated. Once the data is entered into the database, I will then load the data into R for analysis.
+
+In R, I plan to examine the data and calculate different things such as the number of ratings each movie received and the average rating for each movie. I also plan to create some type of visualization comparing the average ratings of the six movies. One challenge I do anticipate is that not every participant may have seen every movie. I plan to represent movies that a participant has not seen as a missing value. These missing values will be excluded when calculating the average ratings.
+
+Data Source: Primary data collected from a survey of at least 5 participants. Participants will be asked to rate each of six selected movies they ahve seen on a scale from 1 to 5.
