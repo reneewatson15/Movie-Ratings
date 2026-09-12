@@ -1,0 +1,112 @@
+---
+title: "Movie Ratings"
+author: "Renee Watson"
+date: "2026-09-10"
+output: html_document
+---
+
+# Movie Ratings
+
+## Approach
+
+In this assignment, I plan to collect movie ratings from at least five people for six popular movies. Each participant will rate the movies they have seen on a scale from 1 to 5. PostgreSQL will be used to store and organize the collected data. Separate tables will be made for the participants, movies, and ratings. The ratings table will connect each participant to the movies they rated. Once the data is entered into the database, I will then load the data into R for analysis.
+
+In R, I plan to examine the data and calculate the number of ratings each movie received and the average rating for each movie. I also plan to create a bar chart comparing the average ratings of the six movies. One challenge I do anticipate is that not every participant may have seen every movie. I plan to represent movies that a participant has not seen as a missing value. These missing values will be excluded when calculating the average ratings.
+
+Data Source: Primary data collected from a survey of at least 5 participants. Participants will be asked to rate each of six selected movies they have seen on a scale from 1 to 5.
+
+## Codebase
+
+I used the DBI, RPostgres, and dplyr packages to connect R to my PostgreSQL database and analyze the data. 
+```{r}
+library(DBI)
+library(RPostgres)
+library(dplyr)
+```
+
+```{r}
+con <- dbConnect(
+  RPostgres::Postgres(),
+  dbname = "movie_ratings",
+  host = "localhost",
+  port = 5432,
+  user = "postgres",
+  password = rstudioapi::askForPassword("Enter PostgreSQL password")
+)
+# I checked the tables stored in the database. 
+dbListTables(con)
+```
+
+I used a SQL query to join the three tables and load the results into an R dataframe. 
+```{r}
+ratings_df <- dbGetQuery(
+  con,
+  "
+  SELECT
+    p.name AS participant,
+	  m.title AS movie,
+  	r.rating
+  FROM ratings AS r
+  JOIN participants AS p
+    ON r.user_id = p.user_id
+  JOIN movies AS m
+  	ON r.movie_id = m.movie_id
+ORDER BY p.user_id, m.movie_id;
+"
+)
+
+ratings_df
+
+```
+
+I reshaped the ratings data so that each row represents a participant and each movie is represented by a separate column. Missing values indicate movies that the participant had not seen. 
+```{r}
+library(tidyr)
+
+ratings_wide <- ratings_df %>%
+  pivot_wider(
+    names_from = movie,
+    values_from = rating
+  )
+
+ratings_wide
+```
+
+## Analysis
+
+To compare the six movies, I calculated the number of ratings, the number of missing ratings, and the average rating for each movie.
+```{r}
+movie_summary <- ratings_df %>%
+  group_by(movie) %>%
+  summarise(
+    number_of_ratings = sum(!is.na(rating)),
+    missing_ratings = sum(is.na(rating)),
+    average_rating = mean(rating, na.rm = TRUE)
+  ) %>%
+  arrange(desc(average_rating))
+
+movie_summary
+```
+
+To better compare the average ratings of the six movies, I created a bar chart showing the average rating for each movie. 
+```{r}
+library(ggplot2)
+
+ggplot(movie_summary, 
+       aes(x = reorder(movie, average_rating),
+           y = average_rating)) + 
+  geom_col() + 
+  coord_flip() + 
+  labs(
+    title = "Average Movie Ratings",
+    x = "Movie",
+    y = "Average Rating"
+  ) + 
+  theme_minimal()
+```
+
+The results and bar chart show that Michael and Spider-Man: Brand New Day had the highest average ratings at 4.6. Sinners had an average rating of 4.5, while Obsession and The Odyssey both had average ratings of 4.0. Toy Story 5 had the lowest average rating at 3.0. Some participants had not seen every movie. These ratings were stored as 'NULL' in PostgreSQL and appeared as 'NA' in R. I did  not replace the missing ratings with another value. Instead, the averages were calculated using only the available ratings. 
+
+## Conclusion 
+
+The results of this analysis show differences in the ratings of the six selected movies. Michael and Spider-Man: Brand New Day had the highest ratings, while Toy Story 5 had the lowest.
