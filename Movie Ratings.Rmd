@@ -110,3 +110,11 @@ The results and bar chart show that Michael and Spider-Man: Brand New Day had th
 ## Conclusion 
 
 The results of this analysis show differences in the ratings of the six selected movies. Michael and Spider-Man: Brand New Day had the highest ratings, while Toy Story 5 had the lowest.
+
+## AI use
+
+OpenAI ChatGPT was used as an AI-assisted development tool for assistance with securely handling the PostgreSQL password in the R database connection code. 
+
+**Tool/model:** OpenAI ChatGPT
+**Developer:** OpenAI
+**Date accessed:** September 11, 2026
